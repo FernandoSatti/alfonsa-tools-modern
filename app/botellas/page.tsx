@@ -42,11 +42,22 @@ const productDatabase: Product[] = [
   { name: "TEQUILA JOSE CUERVO SILVER", bottlesPerBox: 12 },
 ]
 
+// Agregar una nueva interfaz para los resultados de extracción de botellas
+interface BottleExtraction {
+  productName: string
+  bottlesPerBox: number
+}
+
 export default function BotellasPage() {
   const [searchQuery, setSearchQuery] = useState("")
   const [searchResults, setSearchResults] = useState<Product[]>([])
   const [multiplicationInput, setMultiplicationInput] = useState("")
   const [calculationResults, setCalculationResults] = useState<CalculationResult[]>([])
+
+  // Nuevos estados para la extracción de botellas por caja
+  const [extractionInput, setExtractionInput] = useState("")
+  const [extractionResults, setExtractionResults] = useState<BottleExtraction[]>([])
+  const [copySuccess, setCopySuccess] = useState(false)
 
   const normalizeText = (text: string) => {
     return text
@@ -113,6 +124,52 @@ export default function BotellasPage() {
     setCalculationResults((prev) => prev.map((item) => (item.id === itemId ? { ...item, verified: isChecked } : item)))
   }
 
+  // Nueva función para extraer información de botellas por caja
+  const extractBottlesPerBox = () => {
+    if (!extractionInput.trim()) {
+      alert("Por favor, ingresa una lista de productos.")
+      return
+    }
+
+    const lines = extractionInput.trim().split("\n")
+    const results: BottleExtraction[] = []
+
+    lines.forEach((line) => {
+      // Buscar el patrón NxM donde M es el número de botellas por caja
+      const match = line.match(/\d+x(\d+)\s+(.+)$/i)
+
+      if (match) {
+        const bottlesPerBox = Number.parseInt(match[1])
+        const productName = match[2].trim()
+
+        results.push({
+          productName,
+          bottlesPerBox,
+        })
+      }
+    })
+
+    setExtractionResults(results)
+  }
+
+  // Función para copiar los resultados al portapapeles
+  const copyExtractionResults = async () => {
+    if (extractionResults.length === 0) return
+
+    const formattedText = extractionResults
+      .map((result) => `${result.productName} ${result.bottlesPerBox} botellas`)
+      .join("\n")
+
+    try {
+      await navigator.clipboard.writeText(formattedText)
+      setCopySuccess(true)
+      setTimeout(() => setCopySuccess(false), 2000)
+    } catch (err) {
+      console.error("Error al copiar:", err)
+      alert("No se pudo copiar al portapapeles")
+    }
+  }
+
   return (
     <div className="container mx-auto px-4 py-8">
       <h1 className="text-3xl font-bold text-center mb-8">Herramientas de Inventario</h1>
@@ -157,6 +214,53 @@ export default function BotellasPage() {
               <p className="text-gray-500 text-center">No se encontraron productos.</p>
             ) : (
               <p className="text-gray-500 text-center">Ingresa un término de búsqueda para ver resultados.</p>
+            )}
+          </div>
+        </div>
+
+        {/* Nueva sección: Extractor de Botellas por Caja */}
+        <div className="card">
+          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+            <Search size={20} />
+            Extractor de Botellas por Caja
+          </h2>
+          <p className="text-gray-600 mb-4">
+            Pega una lista de productos en formato "NxM PRODUCTO" y obtén una lista con las botellas por caja:
+          </p>
+
+          <textarea
+            className="textarea-field h-40 mb-4"
+            placeholder="Ejemplo:&#10;6x6 OLD SMUGLER 1L&#10;1X12 SKYY APRICOT 750CC&#10;3x6 RUTINI MALBEC 750CC"
+            value={extractionInput}
+            onChange={(e) => setExtractionInput(e.target.value)}
+          />
+
+          <div className="flex gap-2 mb-4">
+            <button onClick={extractBottlesPerBox} className="btn-primary flex items-center gap-2">
+              <Search size={16} />
+              Extraer Información
+            </button>
+            <button
+              onClick={copyExtractionResults}
+              className={`${copySuccess ? "bg-green-600" : "bg-blue-500"} hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors duration-200 font-medium flex items-center gap-2`}
+              disabled={extractionResults.length === 0}
+            >
+              {copySuccess ? "¡Copiado!" : "Copiar Resultados"}
+            </button>
+          </div>
+
+          <div className="bg-gray-50 rounded-md p-4 min-h-32">
+            {extractionResults.length > 0 ? (
+              <div className="space-y-2">
+                {extractionResults.map((result, index) => (
+                  <div key={index} className="p-2 bg-white rounded border">
+                    <span className="font-medium">{result.productName} </span>
+                    <span className="text-blue-600 font-semibold">{result.bottlesPerBox} botellas</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center">Los resultados aparecerán aquí...</p>
             )}
           </div>
         </div>
