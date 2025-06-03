@@ -99,7 +99,7 @@ export default function HomePage() {
                 <Icon className="w-12 h-12 text-blue-500 mx-auto mb-4 group-hover:scale-110 transition-transform duration-200" />
                 <h2 className="text-xl font-semibold text-gray-800 mb-2">{tool.title}</h2>
                 <p className="text-gray-600 mb-4">{tool.description}</p>
-                <span className="btn-primary inline-block">Ir al sitio</span>
+                <span className="btn-primary inline-block">Usar herramienta</span>
               </div>
             </a>
           )
