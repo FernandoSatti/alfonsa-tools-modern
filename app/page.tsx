@@ -69,10 +69,9 @@ export default function HomePage() {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in">
-        {tools.map((tool, index) => {
+        {tools.map((tool) => {
           const Icon = tool.icon
 
-          // Si es interna
           if (tool.href) {
             return (
               <Link key={tool.href} href={tool.href} className="card group">
@@ -86,15 +85,9 @@ export default function HomePage() {
             )
           }
 
-          // Si es externa
+          // Externa pero sin abrir nueva pestaña
           return (
-            <a
-              key={tool.url}
-              href={tool.url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="card group"
-            >
+            <a key={tool.url} href={tool.url} className="card group">
               <div className="text-center">
                 <Icon className="w-12 h-12 text-blue-500 mx-auto mb-4 group-hover:scale-110 transition-transform duration-200" />
                 <h2 className="text-xl font-semibold text-gray-800 mb-2">{tool.title}</h2>
