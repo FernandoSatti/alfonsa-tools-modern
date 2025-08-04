@@ -4,6 +4,7 @@ import React from "react"
 
 import { useState, useEffect } from "react"
 import { FileText, Trash2, Download, Search } from "lucide-react"
+import * as XLSX from "xlsx"
 
 interface StoreData {
   codigo: string
@@ -202,38 +203,377 @@ export default function StockPage() {
       return
     }
 
-    const stores = ["betbeder", "iseas", "llerena"]
-    let csv = "Código,Denominación,"
+    try {
+      // Crear el workbook
+      const workbook = XLSX.utils.book_new()
 
-    stores.forEach((store) => {
-      csv += `${store.charAt(0).toUpperCase() + store.slice(1)} Stock,${store.charAt(0).toUpperCase() + store.slice(1)} Mínimo,${store.charAt(0).toUpperCase() + store.slice(1)} A Reponer,`
-    })
-    csv += "Total a Reponer\n"
+      // Preparar los datos con formato mejorado
+      const excelData: any[] = []
 
-    filteredData.forEach((product) => {
-      csv += `"${product.codigo}","${product.denominacion}",`
+      // Agregar encabezado principal con merge
+      excelData.push([
+        "Código",
+        "Denominación",
+        "Betbeder",
+        "",
+        "",
+        "Iseas",
+        "",
+        "",
+        "Llerena",
+        "",
+        "",
+        "Total a Reponer",
+      ])
 
-      stores.forEach((store) => {
-        const storeData = product.stores[store] || { stock: 0, minimo: 0, reponer: 0 }
-        csv += `${storeData.stock || "0"},${storeData.minimo || ""},${storeData.reponer > 0 ? storeData.reponer : "-"},`
+      // Agregar subencabezados
+      excelData.push([
+        "",
+        "",
+        "Stock",
+        "Mínimo",
+        "A Reponer",
+        "Stock",
+        "Mínimo",
+        "A Reponer",
+        "Stock",
+        "Mínimo",
+        "A Reponer",
+        "",
+      ])
+
+      // Agregar los datos de productos
+      filteredData.forEach((product) => {
+        const betbederData = product.stores["betbeder"] || { stock: 0, minimo: 0, reponer: 0 }
+        const iseasData = product.stores["iseas"] || { stock: 0, minimo: 0, reponer: 0 }
+        const llerenaData = product.stores["llerena"] || { stock: 0, minimo: 0, reponer: 0 }
+
+        excelData.push([
+          product.codigo,
+          product.denominacion,
+          betbederData.stock || 0,
+          betbederData.minimo || "",
+          betbederData.reponer > 0 ? betbederData.reponer : "",
+          iseasData.stock || 0,
+          iseasData.minimo || "",
+          iseasData.reponer > 0 ? iseasData.reponer : "",
+          llerenaData.stock || 0,
+          llerenaData.minimo || "",
+          llerenaData.reponer > 0 ? llerenaData.reponer : "",
+          product.totalReponer > 0 ? product.totalReponer : "",
+        ])
       })
 
-      csv += `${product.totalReponer > 0 ? product.totalReponer : "-"}\n`
-    })
+      // Agregar fila de totales
+      excelData.push([
+        "TOTALES",
+        "",
+        "",
+        "",
+        storeTotals["betbeder"] || 0,
+        "",
+        "",
+        storeTotals["iseas"] || 0,
+        "",
+        "",
+        storeTotals["llerena"] || 0,
+        grandTotal,
+      ])
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" })
-    const url = URL.createObjectURL(blob)
+      // Crear worksheet
+      const worksheet = XLSX.utils.aoa_to_sheet(excelData)
 
-    const link = document.createElement("a")
-    const date = new Date()
-    const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
+      // Configurar anchos de columna
+      const columnWidths = [
+        { wch: 12 }, // Código
+        { wch: 40 }, // Denominación
+        { wch: 10 }, // Betbeder Stock
+        { wch: 10 }, // Betbeder Mínimo
+        { wch: 12 }, // Betbeder A Reponer
+        { wch: 10 }, // Iseas Stock
+        { wch: 10 }, // Iseas Mínimo
+        { wch: 12 }, // Iseas A Reponer
+        { wch: 10 }, // Llerena Stock
+        { wch: 10 }, // Llerena Mínimo
+        { wch: 12 }, // Llerena A Reponer
+        { wch: 15 }, // Total a Reponer
+      ]
+      worksheet["!cols"] = columnWidths
 
-    link.href = url
-    link.download = `reposicion_stock_${formattedDate}.csv`
+      // Configurar merges para encabezados principales
+      worksheet["!merges"] = [
+        { s: { r: 0, c: 2 }, e: { r: 0, c: 4 } }, // Betbeder
+        { s: { r: 0, c: 5 }, e: { r: 0, c: 7 } }, // Iseas
+        { s: { r: 0, c: 8 }, e: { r: 0, c: 10 } }, // Llerena
+        { s: { r: 0, c: 0 }, e: { r: 1, c: 0 } }, // Código
+        { s: { r: 0, c: 1 }, e: { r: 1, c: 1 } }, // Denominación
+        { s: { r: 0, c: 11 }, e: { r: 1, c: 11 } }, // Total a Reponer
+      ]
 
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+      const range = XLSX.utils.decode_range(worksheet["!ref"] || "A1")
+
+      // Aplicar estilos a todas las celdas
+      for (let row = 0; row <= range.e.r; row++) {
+        for (let col = 0; col <= range.e.c; col++) {
+          const cellAddress = XLSX.utils.encode_cell({ r: row, c: col })
+          if (!worksheet[cellAddress]) worksheet[cellAddress] = { v: "" }
+
+          // Estilos para encabezados principales (fila 0)
+          if (row === 0) {
+            if (col === 0 || col === 1 || col === 11) {
+              // Código, Denominación, Total a Reponer
+              worksheet[cellAddress].s = {
+                fill: { fgColor: { rgb: "E5E7EB" } },
+                font: { bold: true, color: { rgb: "374151" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                  top: { style: "medium", color: { rgb: "374151" } },
+                  bottom: { style: "thin", color: { rgb: "9CA3AF" } },
+                  left: { style: "thin", color: { rgb: "9CA3AF" } },
+                  right: { style: "thin", color: { rgb: "9CA3AF" } },
+                },
+              }
+            } else if (col >= 2 && col <= 4) {
+              // Betbeder - Azul claro
+              worksheet[cellAddress].s = {
+                fill: { fgColor: { rgb: "DBEAFE" } },
+                font: { bold: true, color: { rgb: "1E40AF" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                  top: { style: "medium", color: { rgb: "1E40AF" } },
+                  bottom: { style: "thin", color: { rgb: "3B82F6" } },
+                  left: { style: "thin", color: { rgb: "3B82F6" } },
+                  right: { style: "thin", color: { rgb: "3B82F6" } },
+                },
+              }
+            } else if (col >= 5 && col <= 7) {
+              // Iseas - Verde claro
+              worksheet[cellAddress].s = {
+                fill: { fgColor: { rgb: "D1FAE5" } },
+                font: { bold: true, color: { rgb: "065F46" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                  top: { style: "medium", color: { rgb: "065F46" } },
+                  bottom: { style: "thin", color: { rgb: "10B981" } },
+                  left: { style: "thin", color: { rgb: "10B981" } },
+                  right: { style: "thin", color: { rgb: "10B981" } },
+                },
+              }
+            } else if (col >= 8 && col <= 10) {
+              // Llerena - Naranja claro
+              worksheet[cellAddress].s = {
+                fill: { fgColor: { rgb: "FED7AA" } },
+                font: { bold: true, color: { rgb: "9A3412" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                  top: { style: "medium", color: { rgb: "9A3412" } },
+                  bottom: { style: "thin", color: { rgb: "F97316" } },
+                  left: { style: "thin", color: { rgb: "F97316" } },
+                  right: { style: "thin", color: { rgb: "F97316" } },
+                },
+              }
+            }
+          }
+          // Estilos para subencabezados (fila 1)
+          else if (row === 1) {
+            if (col >= 2 && col <= 4) {
+              // Betbeder subheaders
+              worksheet[cellAddress].s = {
+                fill: { fgColor: { rgb: "DBEAFE" } },
+                font: { bold: true, color: { rgb: "1E40AF" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                  top: { style: "thin", color: { rgb: "3B82F6" } },
+                  bottom: { style: "medium", color: { rgb: "1E40AF" } },
+                  left: { style: "thin", color: { rgb: "3B82F6" } },
+                  right: { style: "thin", color: { rgb: "3B82F6" } },
+                },
+              }
+            } else if (col >= 5 && col <= 7) {
+              // Iseas subheaders
+              worksheet[cellAddress].s = {
+                fill: { fgColor: { rgb: "D1FAE5" } },
+                font: { bold: true, color: { rgb: "065F46" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                  top: { style: "thin", color: { rgb: "10B981" } },
+                  bottom: { style: "medium", color: { rgb: "065F46" } },
+                  left: { style: "thin", color: { rgb: "10B981" } },
+                  right: { style: "thin", color: { rgb: "10B981" } },
+                },
+              }
+            } else if (col >= 8 && col <= 10) {
+              // Llerena subheaders
+              worksheet[cellAddress].s = {
+                fill: { fgColor: { rgb: "FED7AA" } },
+                font: { bold: true, color: { rgb: "9A3412" } },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                  top: { style: "thin", color: { rgb: "F97316" } },
+                  bottom: { style: "medium", color: { rgb: "9A3412" } },
+                  left: { style: "thin", color: { rgb: "F97316" } },
+                  right: { style: "thin", color: { rgb: "F97316" } },
+                },
+              }
+            }
+          }
+          // Estilos para filas de datos
+          else if (row < excelData.length - 1) {
+            // Código y Denominación
+            if (col <= 1) {
+              worksheet[cellAddress].s = {
+                alignment: { horizontal: col === 0 ? "center" : "left", vertical: "center" },
+                border: {
+                  top: { style: "thin", color: { rgb: "D1D5DB" } },
+                  bottom: { style: "thin", color: { rgb: "D1D5DB" } },
+                  left: { style: "thin", color: { rgb: "D1D5DB" } },
+                  right: { style: "thin", color: { rgb: "D1D5DB" } },
+                },
+              }
+            }
+            // Columnas Betbeder
+            else if (col >= 2 && col <= 4) {
+              const isStock = col === 2
+              const isReponer = col === 4
+              const cellValue = worksheet[cellAddress].v
+
+              worksheet[cellAddress].s = {
+                fill: { fgColor: { rgb: "F0F9FF" } },
+                font: {
+                  color:
+                    (isStock && cellValue === 0) || (isReponer && cellValue && cellValue !== "")
+                      ? { rgb: "DC2626" }
+                      : { rgb: "1E40AF" },
+                  bold: (isStock && cellValue === 0) || (isReponer && cellValue && cellValue !== ""),
+                },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                  top: { style: "thin", color: { rgb: "3B82F6" } },
+                  bottom: { style: "thin", color: { rgb: "3B82F6" } },
+                  left: { style: "thin", color: { rgb: "3B82F6" } },
+                  right: { style: "thin", color: { rgb: "3B82F6" } },
+                },
+              }
+            }
+            // Columnas Iseas
+            else if (col >= 5 && col <= 7) {
+              const isStock = col === 5
+              const isReponer = col === 7
+              const cellValue = worksheet[cellAddress].v
+
+              worksheet[cellAddress].s = {
+                fill: { fgColor: { rgb: "F0FDF4" } },
+                font: {
+                  color:
+                    (isStock && cellValue === 0) || (isReponer && cellValue && cellValue !== "")
+                      ? { rgb: "DC2626" }
+                      : { rgb: "065F46" },
+                  bold: (isStock && cellValue === 0) || (isReponer && cellValue && cellValue !== ""),
+                },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                  top: { style: "thin", color: { rgb: "10B981" } },
+                  bottom: { style: "thin", color: { rgb: "10B981" } },
+                  left: { style: "thin", color: { rgb: "10B981" } },
+                  right: { style: "thin", color: { rgb: "10B981" } },
+                },
+              }
+            }
+            // Columnas Llerena
+            else if (col >= 8 && col <= 10) {
+              const isStock = col === 8
+              const isReponer = col === 10
+              const cellValue = worksheet[cellAddress].v
+
+              worksheet[cellAddress].s = {
+                fill: { fgColor: { rgb: "FFF7ED" } },
+                font: {
+                  color:
+                    (isStock && cellValue === 0) || (isReponer && cellValue && cellValue !== "")
+                      ? { rgb: "DC2626" }
+                      : { rgb: "9A3412" },
+                  bold: (isStock && cellValue === 0) || (isReponer && cellValue && cellValue !== ""),
+                },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                  top: { style: "thin", color: { rgb: "F97316" } },
+                  bottom: { style: "thin", color: { rgb: "F97316" } },
+                  left: { style: "thin", color: { rgb: "F97316" } },
+                  right: { style: "thin", color: { rgb: "F97316" } },
+                },
+              }
+            }
+            // Total a Reponer
+            else if (col === 11) {
+              const cellValue = worksheet[cellAddress].v
+              worksheet[cellAddress].s = {
+                font: {
+                  color: cellValue && cellValue !== "" ? { rgb: "DC2626" } : { rgb: "374151" },
+                  bold: cellValue && cellValue !== "",
+                },
+                alignment: { horizontal: "center", vertical: "center" },
+                border: {
+                  top: { style: "thin", color: { rgb: "D1D5DB" } },
+                  bottom: { style: "thin", color: { rgb: "D1D5DB" } },
+                  left: { style: "thin", color: { rgb: "D1D5DB" } },
+                  right: { style: "thin", color: { rgb: "D1D5DB" } },
+                },
+              }
+            }
+          }
+          // Fila de totales (última fila)
+          else {
+            worksheet[cellAddress].s = {
+              fill: { fgColor: { rgb: "F3F4F6" } },
+              font: { bold: true, color: { rgb: "DC2626" } },
+              alignment: { horizontal: "center", vertical: "center" },
+              border: {
+                top: { style: "medium", color: { rgb: "374151" } },
+                bottom: { style: "medium", color: { rgb: "374151" } },
+                left: { style: "thin", color: { rgb: "9CA3AF" } },
+                right: { style: "thin", color: { rgb: "9CA3AF" } },
+              },
+            }
+          }
+        }
+      }
+
+      // Agregar el worksheet al workbook
+      XLSX.utils.book_append_sheet(workbook, worksheet, "Reposición de Stock")
+
+      // Generar el archivo como buffer con encoding correcto
+      const excelBuffer = XLSX.write(workbook, {
+        bookType: "xlsx",
+        type: "array",
+        bookSST: false,
+        compression: true,
+      })
+
+      // Crear blob y descargar
+      const blob = new Blob([excelBuffer], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      })
+
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement("a")
+      const date = new Date()
+      const formattedDate = `${date.getDate()}-${date.getMonth() + 1}-${date.getFullYear()}`
+
+      link.href = url
+      link.download = `reposicion_stock_${formattedDate}.xlsx`
+
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      // Limpiar el URL del objeto
+      URL.revokeObjectURL(url)
+
+      alert(`Excel exportado correctamente con ${filteredData.length} productos`)
+    } catch (error) {
+      console.error("Error al exportar Excel:", error)
+      alert("Error al exportar el archivo Excel")
+    }
   }
 
   const stores = ["betbeder", "iseas", "llerena"]

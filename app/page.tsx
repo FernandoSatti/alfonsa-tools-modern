@@ -7,6 +7,7 @@ import {
   Package,
   BarChart3,
   BoxIcon as Bottle,
+  ShoppingCart,
 } from "lucide-react"
 
 const tools = [
@@ -53,10 +54,16 @@ const tools = [
     description: "Botellas por caja en cada producto y control.",
   },
   {
-    url: "https://v0-pedido-tracking-system.vercel.app/",
+    href: "https://pedidos-alfonsa-dist.vercel.app/",
+    icon: ShoppingCart,
+    title: "Gestión de Pedidos",
+    description: "Gestiona pedidos a proveedores y su estado.",
+  },
+  {
+    href: "/generador-mails",
     icon: FileText,
-    title: "Pedidos",
-    description: "Seguimiento de pedidos y control externo.",
+    title: "Generador de Mails",
+    description: "Extrae nombres y emails de listas de Excel para envío masivo.",
   },
 ]
 
@@ -71,30 +78,15 @@ export default function HomePage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 fade-in">
         {tools.map((tool) => {
           const Icon = tool.icon
-
-          if (tool.href) {
-            return (
-              <Link key={tool.href} href={tool.href} className="card group">
-                <div className="text-center">
-                  <Icon className="w-12 h-12 text-blue-500 mx-auto mb-4 group-hover:scale-110 transition-transform duration-200" />
-                  <h2 className="text-xl font-semibold text-gray-800 mb-2">{tool.title}</h2>
-                  <p className="text-gray-600 mb-4">{tool.description}</p>
-                  <span className="btn-primary inline-block">Usar herramienta</span>
-                </div>
-              </Link>
-            )
-          }
-
-          // Externa pero sin abrir nueva pestaña
           return (
-            <a key={tool.url} href={tool.url} className="card group">
+            <Link key={tool.href} href={tool.href} className="card group">
               <div className="text-center">
                 <Icon className="w-12 h-12 text-blue-500 mx-auto mb-4 group-hover:scale-110 transition-transform duration-200" />
                 <h2 className="text-xl font-semibold text-gray-800 mb-2">{tool.title}</h2>
                 <p className="text-gray-600 mb-4">{tool.description}</p>
                 <span className="btn-primary inline-block">Usar herramienta</span>
               </div>
-            </a>
+            </Link>
           )
         })}
       </div>

@@ -12,10 +12,19 @@ const categories = {
   "ACEITES Y VINAGRES": "🫒",
   ARROZ: "🍚",
   BEBIDAS: "🥂",
+  CEREALES: "🥣",
   CIGARRILLOS: "🚬",
+  CONDIMENTOS: "🧂",
   FIDEOS: "🍜",
+  GALLETITAS: "🍪",
+  "GOLOSINAS Y ENDULZANTES": "🍭",
   HARINAS: "🌾",
+  "LIMPIEZA E HIGIENE": "🧽",
+  OTROS: "📋",
+  REPELENTES: "🦟",
   REPOSTERIA: "🍰",
+  "SALSAS Y ADEREZOS": "🥄",
+  SNACKS: "🥨",
   "YERBAS E INFUSIONES": "🌿",
   "APERITIVOS Y CACHACAS": "🍹",
   CERVEZAS: "🍻",
@@ -23,10 +32,14 @@ const categories = {
   DESTILADOS: "🥃",
   ENERGIZANTES: "⚡",
   "GASEOSAS, JUGOS Y AGUAS": "🥤",
+  "GIN Y GINEBRAS": "🍸",
   GRAPAS: "🍇",
   LICORES: "🥃",
   "MINIATURAS Y PETACAS": "✨",
+  RON: "🏴‍☠️",
   SIDRAS: "🍏",
+  VODKAS: "🧊",
+  WHISKY: "🥃",
   COMIDAS: "🍴",
   "CRISTALERIA Y MAS": "🫗",
   "ESTUCHERIA Y GIFTPACK": "📦",
@@ -105,13 +118,23 @@ export default function ListasPage() {
       let isCategoryLine = false
       for (const category in categories) {
         if (trimmedLine.toUpperCase().startsWith(category) && currentCategory !== category) {
-          // Si estábamos en la sección de vinos, ordenar los productos antes de continuar
-          if (isInWinesSection && currentCategoryProducts.length > 0) {
-            currentCategoryProducts.sort((a, b) => {
-              const nameA = extractProductName(a).toUpperCase()
-              const nameB = extractProductName(b).toUpperCase()
-              return nameA.localeCompare(nameB)
-            })
+          // Si había productos acumulados en la categoría anterior, ordenarlos y agregarlos
+          if (currentCategoryProducts.length > 0) {
+            if (isInWinesSection) {
+              // Para vinos, ordenar alfabéticamente por nombre del producto
+              currentCategoryProducts.sort((a, b) => {
+                const nameA = extractProductName(a).toUpperCase()
+                const nameB = extractProductName(b).toUpperCase()
+                return nameA.localeCompare(nameB)
+              })
+            } else {
+              // Para otras categorías, ordenar alfabéticamente
+              currentCategoryProducts.sort((a, b) => {
+                const nameA = extractProductName(a).toUpperCase()
+                const nameB = extractProductName(b).toUpperCase()
+                return nameA.localeCompare(nameB)
+              })
+            }
             currentCategoryProducts.forEach((product) => {
               formattedList += `${product}\n`
             })
@@ -119,19 +142,7 @@ export default function ListasPage() {
           }
 
           // Agregar categoría con emoji
-          if (
-            category === "ACEITES Y VINAGRES" ||
-            category === "ARROZ" ||
-            category === "CIGARRILLOS" ||
-            category === "FIDEOS" ||
-            category === "HARINAS" ||
-            category === "REPOSTERIA" ||
-            category === "YERBAS E INFUSIONES"
-          ) {
-            formattedList += `\n${categories[category as keyof typeof categories]} ${category.toUpperCase()}\n\n`
-          } else {
-            formattedList += `\n${categories[category as keyof typeof categories]} ${category.toUpperCase()}\n\n`
-          }
+          formattedList += `\n${categories[category as keyof typeof categories]} ${category.toUpperCase()}\n\n`
 
           currentCategory = category
           isInWinesSection = category === "VINOS"
@@ -142,21 +153,26 @@ export default function ListasPage() {
 
       // Si no es una línea de categoría, procesar como producto
       if (!isCategoryLine && trimmedLine !== "") {
-        if (isInWinesSection) {
-          currentCategoryProducts.push(trimmedLine)
-        } else {
-          formattedList += `${trimmedLine}\n`
-        }
+        // Acumular productos para ordenar después
+        currentCategoryProducts.push(trimmedLine)
       }
     })
 
-    // Si terminamos y estábamos en la sección de vinos, ordenar los productos finales
-    if (isInWinesSection && currentCategoryProducts.length > 0) {
-      currentCategoryProducts.sort((a, b) => {
-        const nameA = extractProductName(a).toUpperCase()
-        const nameB = extractProductName(b).toUpperCase()
-        return nameA.localeCompare(nameB)
-      })
+    // Si terminamos y había productos acumulados, ordenarlos y agregarlos
+    if (currentCategoryProducts.length > 0) {
+      if (isInWinesSection) {
+        currentCategoryProducts.sort((a, b) => {
+          const nameA = extractProductName(a).toUpperCase()
+          const nameB = extractProductName(b).toUpperCase()
+          return nameA.localeCompare(nameB)
+        })
+      } else {
+        currentCategoryProducts.sort((a, b) => {
+          const nameA = extractProductName(a).toUpperCase()
+          const nameB = extractProductName(b).toUpperCase()
+          return nameA.localeCompare(nameB)
+        })
+      }
       currentCategoryProducts.forEach((product) => {
         formattedList += `${product}\n`
       })
@@ -191,11 +207,11 @@ export default function ListasPage() {
       let isCategoryLine = false
       for (const category in categories) {
         if (trimmedLine.toUpperCase().startsWith(category) && currentCategory !== category) {
-          // Si estábamos en la sección de vinos, ordenar los productos antes de continuar
-          if (isInWinesSection && currentCategoryProducts.length > 0) {
+          // Si había productos acumulados en la categoría anterior, ordenarlos y agregarlos
+          if (currentCategoryProducts.length > 0) {
             currentCategoryProducts.sort((a, b) => {
-              const nameA = extractProductName(a).toUpperCase()
-              const nameB = extractProductName(b).toUpperCase()
+              const nameA = extractProductName(a.replace(" 🆕", "")).toUpperCase()
+              const nameB = extractProductName(b.replace(" 🆕", "")).toUpperCase()
               return nameA.localeCompare(nameB)
             })
             currentCategoryProducts.forEach((product) => {
@@ -205,19 +221,7 @@ export default function ListasPage() {
           }
 
           // Agregar categoría con emoji
-          if (
-            category === "ACEITES Y VINAGRES" ||
-            category === "ARROZ" ||
-            category === "CIGARRILLOS" ||
-            category === "FIDEOS" ||
-            category === "HARINAS" ||
-            category === "REPOSTERIA" ||
-            category === "YERBAS E INFUSIONES"
-          ) {
-            formattedList += `\n${categories[category as keyof typeof categories]} ${category.toUpperCase()}\n\n`
-          } else {
-            formattedList += `\n${categories[category as keyof typeof categories]} ${category.toUpperCase()}\n\n`
-          }
+          formattedList += `\n${categories[category as keyof typeof categories]} ${category.toUpperCase()}\n\n`
 
           currentCategory = category
           isInWinesSection = category === "VINOS"
@@ -239,17 +243,13 @@ export default function ListasPage() {
         // Preparar la línea final
         const finalLine = isNew ? `${trimmedLine} 🆕` : trimmedLine
 
-        // Si estamos en la sección de vinos, acumular para ordenar después
-        if (isInWinesSection) {
-          currentCategoryProducts.push(finalLine)
-        } else {
-          formattedList += `${finalLine}\n`
-        }
+        // Acumular para ordenar después
+        currentCategoryProducts.push(finalLine)
       }
     })
 
-    // Si terminamos y estábamos en la sección de vinos, ordenar los productos finales
-    if (isInWinesSection && currentCategoryProducts.length > 0) {
+    // Si terminamos y había productos acumulados, ordenarlos y agregarlos
+    if (currentCategoryProducts.length > 0) {
       currentCategoryProducts.sort((a, b) => {
         const nameA = extractProductName(a.replace(" 🆕", "")).toUpperCase()
         const nameB = extractProductName(b.replace(" 🆕", "")).toUpperCase()
