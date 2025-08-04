@@ -57,7 +57,7 @@ const tools = [
     href: "https://pedidos-alfonsa-dist.vercel.app/",
     icon: ShoppingCart,
     title: "Gestión de Pedidos",
-    description: "Gestiona pedidos a proveedores y su estado.",
+    description: "Gestiona pedidos a clientes y su seguimiento",
   },
   {
     href: "/generador-mails",
