@@ -8,6 +8,7 @@ import {
   BarChart3,
   BoxIcon as Bottle,
   ShoppingCart,
+  Settings,
 } from "lucide-react"
 
 const tools = [
@@ -57,13 +58,19 @@ const tools = [
     href: "https://pedidos-alfonsa-dist.vercel.app/",
     icon: ShoppingCart,
     title: "Gestión de Pedidos",
-    description: "Gestiona pedidos a clientes y su seguimiento",
+    description: "Gestiona pedidos a proveedores y su estado.",
   },
   {
     href: "/generador-mails",
     icon: FileText,
     title: "Generador de Mails",
     description: "Extrae nombres y emails de listas de Excel para envío masivo.",
+  },
+  {
+    href: "/procesador-pedidos",
+    icon: Settings,
+    title: "Procesador de Pedidos",
+    description: "Procesa respuestas de proveedores y separa disponibles de faltantes.",
   },
 ]
 
