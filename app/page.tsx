@@ -72,6 +72,12 @@ const tools = [
     title: "Procesador de Pedidos",
     description: "Procesa respuestas de proveedores y separa disponibles de faltantes.",
   },
+  {
+    href: "https://generador-etiquetas-drab.vercel.app/",
+    icon: FileText,
+    title: "Impresión de Etiquetas",
+    description: "Gestiona y etiqueta tus precios aplicando descuentos.",
+  },
 ]
 
 export default function HomePage() {
