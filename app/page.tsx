@@ -78,6 +78,12 @@ const tools = [
     title: "Impresión de Etiquetas",
     description: "Gestiona y etiqueta tus precios aplicando descuentos.",
   },
+  {
+    href: "https://asistencia-app-definitivaa.vercel.app/",
+    icon: FileText,
+    title: "Asistencias Y pagos",
+    description: "Gestiona cuanto pagar a los trabajadores.",
+  },
 ]
 
 export default function HomePage() {
