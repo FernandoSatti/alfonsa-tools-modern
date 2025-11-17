@@ -84,6 +84,18 @@ const tools = [
     title: "Asistencias Y pagos",
     description: "Gestiona cuanto pagar a los trabajadores.",
   },
+   {
+    href: "https://v0-expiration-date-tracker-one.vercel.app/",
+    icon: Bottle,
+    title: "Control de Vencimientos",
+    description: "Gestiona por fecha los productos",
+  },
+  {
+    href: "#",
+    icon: Calculator,
+    title: "Presupuestador Móvil",
+    description: "(proximamente)",
+  },
 ]
 
 export default function HomePage() {
