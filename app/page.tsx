@@ -55,7 +55,7 @@ const tools = [
     description: "Botellas por caja en cada producto y control.",
   },
   {
-    href: "pedidosalfonsa.vercel.app",
+    href: "https://pedidosalfonsa.vercel.app",
     icon: ShoppingCart,
     title: "Gestión de Pedidos",
     description: "Gestiona pedidos a proveedores y su estado.",
