@@ -55,7 +55,7 @@ const tools = [
     description: "Botellas por caja en cada producto y control.",
   },
   {
-    href: "https://pedidos-alfonsa-dist.vercel.app/",
+    href: "pedidosalfonsa.vercel.app",
     icon: ShoppingCart,
     title: "Gestión de Pedidos",
     description: "Gestiona pedidos a proveedores y su estado.",
@@ -73,7 +73,7 @@ const tools = [
     description: "Procesa respuestas de proveedores y separa disponibles de faltantes.",
   },
   {
-    href: "https://generador-etiquetas-drab.vercel.app/",
+    href: "https://alfonsaetiquetas.vercel.app",
     icon: FileText,
     title: "Impresión de Etiquetas",
     description: "Gestiona y etiqueta tus precios aplicando descuentos.",
@@ -85,7 +85,7 @@ const tools = [
     description: "Gestiona cuanto pagar a los trabajadores.",
   },
    {
-    href: "https://v0-expiration-date-tracker-one.vercel.app/",
+    href: "https://vencimientosalfonsa.vercel.app",
     icon: Bottle,
     title: "Control de Vencimientos",
     description: "Gestiona por fecha los productos",
@@ -94,6 +94,12 @@ const tools = [
     href: "#",
     icon: Calculator,
     title: "Presupuestador Móvil",
+    description: "(proximamente)",
+  },
+  {
+    href: "#",
+    icon: TrendingUp,
+    title: "Analiza datos de compra",
     description: "(proximamente)",
   },
 ]
