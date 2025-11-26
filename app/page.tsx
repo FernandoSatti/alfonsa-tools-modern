@@ -73,7 +73,7 @@ const tools = [
     description: "Procesa respuestas de proveedores y separa disponibles de faltantes.",
   },
   {
-    href: "https://alfonsaetiquetas.vercel.app",
+    href: "https://generador-etiquetas-drab.vercel.app/",
     icon: FileText,
     title: "Impresión de Etiquetas",
     description: "Gestiona y etiqueta tus precios aplicando descuentos.",
@@ -91,7 +91,7 @@ const tools = [
     description: "Gestiona por fecha los productos",
   },
   {
-    href: "#",
+    href: "https://presupuestadoralfonsa.vercel.app",
     icon: Calculator,
     title: "Presupuestador Móvil",
     description: "(proximamente)",
